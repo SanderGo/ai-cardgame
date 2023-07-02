@@ -6,26 +6,42 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <title>AI:OH</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script type="text/javascript">
         function joinLobby() {
-            var userInput2 = document.getElementById("name").value;
-            localStorage.setItem("nameInput", userInput2);
+            var userNameInput = document.getElementById("player_name").value.trim();
 
-            var roomCode = generateRoomCode(); // Call the function to generate a unique room code
-            localStorage.setItem("roomInput", roomCode);
+            // Check if the name is not empty
+            if (userNameInput === '') {
+                alert('Please enter a nickname.');
+                return;
+            }
 
-            // Set room code via AJAX
-            axios.post('/set-room-code', { roomCode: roomCode })
-            .then(function (response) {
-                console.log(response.data.success); // Room code set successfully
+            var roomCodeElement = document.getElementById('room-code');
+            var roomCode = roomCodeElement.textContent; // Retrieve the room code from the DOM
+
+            // Set room code via Fetch API
+            fetch('/set-room-code', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ roomCode: roomCode })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.success); // Room code set successfully
+                localStorage.setItem("roomCode", roomCode); // Store the room code in localStorage
                 window.location.href = '{{ route('lobby') }}'; // Redirect to the lobby page
             })
-            .catch(function (error) {
-                console.log(error);
+            .catch((error) => {
+                console.error('Error:', error);
             });
-        }
 
+
+            localStorage.setItem("playerName", userNameInput);
+            localStorage.setItem("roomInput", roomCode);
+        }
 
         function generateRoomCode() {
             var length = 5; // Length of the room code
@@ -52,9 +68,19 @@
 
     <div id="center">
         <div id="join-button">
-            <button onclick="joinLobby()" class="btn btn-light custom-button1">Join a room!</button>
+            <button onclick="joinLobby()" class="btn btn-light custom-button1">Create a room!</button>
         </div>
-        <input class="form-control input1" type="text" id="name" name="name" placeholder="Enter Nickname Here" onkeypress="return isAlphanumeric(event)">
+        <p>Room Code: <span id="room-code">{{ session('roomCode') }}</span></p>
+        <input class="form-control input1" type="text" id="player_name" name="player_name" placeholder="Enter Nickname Here" onkeypress="return isAlphanumeric(event)">
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var roomCodeElement = document.getElementById('room-code');
+            if (roomCodeElement.textContent === '') {
+                roomCodeElement.textContent = generateRoomCode();
+            }
+        });
+    </script>
 </body>
 </html>

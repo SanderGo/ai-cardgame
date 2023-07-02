@@ -8,15 +8,22 @@
     <title>AI:OH</title>
     <script type="text/javascript">
         function roomGrab() {
-            var userInput = document.getElementById("code").value.trim();
-            if (userInput !== '') {
+            var roomInput = document.getElementById("code").value.trim();
+
+            // Check if roomInput has exactly 5 characters
+            if (roomInput.length !== 5) {
+                alert('Please enter a valid room code with exactly 5 characters.');
+                return;
+            }
+
+            if (roomInput !== '') {
                 fetch('/join-room', { 
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({ roomCode: userInput })
+                    body: JSON.stringify({ roomCode: roomInput })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -30,6 +37,7 @@
                 alert('Please enter a valid room code.');
             }
         }
+
 
     </script>
 

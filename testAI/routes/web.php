@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Helpers\RoomCodeGenerator;
 use Illuminate\Http\Request;
+use App\Events\PlayerJoinedLobby;
+use App\Http\Controllers\GameController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +46,10 @@ Route::post('/set-room-code', function (Request $request) {
     session(['roomCode' => $request->roomCode]);
     return response()->json(['success' => 'Room code set successfully']);
 });
+
+Route::post('/join', [GameController::class, 'joinGame'])->name('join');
+
+
 
 
 
