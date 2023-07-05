@@ -45,7 +45,7 @@
 
         function generateRoomCode() {
             var length = 5; // Length of the room code
-            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'; // Allowed characters
+            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; // Allowed characters
 
             var roomCode = '';
             for (var i = 0; i < length; i++) {

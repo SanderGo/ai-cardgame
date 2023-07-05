@@ -1,30 +1,31 @@
 <?php
-
 namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
 class PlayerJoinedLobby implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $playerList;
+    public $playerListJson;
     public $roomCode;
 
-     /**
+    /**
      * Create a new event instance.
      *
-     * @param array  $playerList // Update the type from string to array
-     * @param string $roomCode
+     * @param  Array  $playerList
+     * @param  String $roomCode
      * @return void
      */
-    public function __construct(array $playerList, string $roomCode) // Update the type from string to array
+    public function __construct($playerList, $roomCode)
     {
-        $this->playerList = $playerList; // Rename from $playerName
+        $this->playerListJson = json_encode($playerList);
         $this->roomCode = $roomCode;
     }
 
@@ -35,6 +36,6 @@ class PlayerJoinedLobby implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new Channel('lobby-' . $this->roomCode);
+        return new Channel('room.' . $this->roomCode);
     }
 }

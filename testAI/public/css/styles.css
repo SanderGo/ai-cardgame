@@ -73,3 +73,14 @@ body {
     background-color: transparent;
 }
 
+#smallTitle{
+    font-family: 'copperplate';
+    font-size: 200%;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    background-color: rgb(0,70,81,255);
+    display: inline-block;
+}

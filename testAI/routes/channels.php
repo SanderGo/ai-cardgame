@@ -20,3 +20,7 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 Broadcast::channel('lobby', function ($user) {
     return true; // Adjust the logic to check authorization if needed
 });
+
+Broadcast::channel('room.{roomCode}', function ($user, $roomCode) {
+    return true;
+});

@@ -49,7 +49,13 @@ Route::post('/set-room-code', function (Request $request) {
 
 Route::post('/join', [GameController::class, 'joinGame'])->name('join');
 
-
+Route::get('/game', function () {
+    if (session('roomCode')) {
+        return view('game');
+    } else {
+        return redirect()->route('home');
+    }
+})->name('game');
 
 
 
