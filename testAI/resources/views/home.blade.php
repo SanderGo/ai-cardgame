@@ -7,6 +7,13 @@
     <link rel="stylesheet" href="<?php echo asset('css/styles.css')?>">
     <title>AI:OH</title>
     <script type="text/javascript">
+        var y = 0;
+        setInterval(function(){
+            y+=1;
+            document.body.style.backgroundPosition = '0 ' + y + 'px';
+        }, 10);
+    </script>
+    <script type="text/javascript">
         function roomGrab() {
             var roomInput = document.getElementById("code").value.trim();
 
@@ -37,8 +44,6 @@
                 alert('Please enter a valid room code.');
             }
         }
-
-
     </script>
 
     <<script src="{{ asset('js/stringInput.js') }}"></script>

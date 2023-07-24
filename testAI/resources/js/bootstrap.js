@@ -10,19 +10,24 @@ window.Pusher = Pusher;
 
 window.Echo = new Echo({
     broadcaster: 'pusher',
-    key: '4c231fdc01a893cb3773',
-    cluster: 'us2',
-    forceTLS: 'true',
-    encrypted: true,
-    auth: {
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-        },
-    },
+    key: process.env.MIX_PUSHER_APP_KEY,
+    wsHost: window.location.hostname,
+    wsPort: 6001,
+    disableStats: true,
+    encrypted: false,
 });
   
-window.Echo.channel('lobby')
-.listen('.PlayerJoinedLobby', (event) => {
-    // Update the player list in the UI
-    console.log('Player joined:', event.playerName);
-});
+window.Echo.join(`room.${localStorage.getItem("roomCode")}`)
+    .here((users) => {
+        console.log('Users in channel:', users);
+    })
+    .joining((user) => {
+        console.log('A new user joined:', user.name);
+    })
+    .leaving((user) => {
+        console.log('A user left:', user.name);
+    })
+    .listen('.PlayerJoinedLobby', (event) => {
+        // Here, instead of "playerName", you should use the actual data property name sent by the server.
+        console.log('Player joined:', event.playerName); 
+    });
