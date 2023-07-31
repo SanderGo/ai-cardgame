@@ -5,6 +5,9 @@ use App\Helpers\RoomCodeGenerator;
 use Illuminate\Http\Request;
 use App\Events\PlayerJoinedLobby;
 use App\Http\Controllers\GameController;
+use App\Http\Controllers\RoomController;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Redis;
 
 
 /*
@@ -22,41 +25,38 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/create', function () {
-    $roomCode = RoomCodeGenerator::generateRoomCode(); // Call a function to generate a unique room code
-    session(['roomCode' => $roomCode]);
-    return view('create');
+Route::get('/create', [RoomController::class, 'joinOrCreateRoom'])->name('create');
+
+
+Route::post('/set-room-code', function (Request $request) {
+    Redis::set('roomCode', $request->roomCode);
+    return response()->json(['success' => 'Room code set successfully']);
 });
 
+Route::get('/get-room-code', [RoomController::class, 'getRoomCode'])->name('get-room-code');
+
 Route::get('/lobby', function () {
-    if (session('roomCode')) {
+    $roomCode = Redis::get('roomCode');
+    if ($roomCode) {
         return view('lobby');
     } else {
         return redirect()->route('home');
     }
 })->name('lobby');
 
-Route::post('/join-room', function (Request $request) {
-    session(['roomCode' => $request->roomCode]);
-    return response()->json(['success' => 'Room code set successfully']);
-});
-
-
-Route::post('/set-room-code', function (Request $request) {
-    session(['roomCode' => $request->roomCode]);
-    return response()->json(['success' => 'Room code set successfully']);
-});
-
 Route::post('/join', [GameController::class, 'joinGame'])->name('join');
 
 Route::get('/game', function () {
-    if (session('roomCode')) {
+    $roomCode = Redis::get('roomCode');
+    if ($roomCode) {
         return view('game');
     } else {
         return redirect()->route('home');
     }
 })->name('game');
 
+Route::post('/join-room', [RoomController::class, 'joinOrCreateRoom']);
 
-
-
+Route::post('/broadcasting/auth', function () {
+    return Auth::check() ? Auth::user() : abort(403);
+});

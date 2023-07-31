@@ -12,10 +12,11 @@ window.Echo = new Echo({
     broadcaster: 'pusher',
     key: process.env.MIX_PUSHER_APP_KEY,
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
-    encrypted: true,
+    encrypted: false,
+    scheme: 'https',
 });
   
-window.Echo.join(`room.${localStorage.getItem("roomCode")}`)
+window.Echo.join(`presence-room.${localStorage.getItem("roomCode")}`)
     .here((users) => {
         console.log('Users in channel:', users);
     })

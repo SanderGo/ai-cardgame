@@ -36,7 +36,8 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   broadcaster: 'pusher',
   key: "4c231fdc01a893cb3773",
   cluster: "us2",
-  encrypted: true
+  encrypted: true,
+  scheme: 'https'
 });
 window.Echo.join("room.".concat(localStorage.getItem("roomCode"))).here(function (users) {
   console.log('Users in channel:', users);
@@ -2321,7 +2322,7 @@ var EventFormatter = /*#__PURE__*/function () {
   function EventFormatter(namespace) {
     _classCallCheck(this, EventFormatter);
 
-    this.setNamespace(namespace);
+    this.namespace = namespace; //
   }
   /**
    * Format the given event name.
@@ -3830,7 +3831,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 /*!
- * Pusher JavaScript Library v8.2.0
+ * Pusher JavaScript Library v8.3.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -4417,7 +4418,7 @@ var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.Scrip
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.2.0",
+    VERSION: "8.3.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -6782,12 +6783,12 @@ function abortRunner(runner) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/cached_strategy.ts
+// CONCATENATED MODULE: ./src/core/strategies/websocket_prioritized_cached_strategy.ts
 
 
 
 
-class cached_strategy_CachedStrategy {
+class websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy {
     constructor(strategy, transports, options) {
         this.strategy = strategy;
         this.transports = transports;
@@ -6801,19 +6802,25 @@ class cached_strategy_CachedStrategy {
     connect(minPriority, callback) {
         var usingTLS = this.usingTLS;
         var info = fetchTransportCache(usingTLS);
+        var cacheSkipCount = info && info.cacheSkipCount ? info.cacheSkipCount : 0;
         var strategies = [this.strategy];
         if (info && info.timestamp + this.ttl >= util.now()) {
             var transport = this.transports[info.transport];
             if (transport) {
-                this.timeline.info({
-                    cached: true,
-                    transport: info.transport,
-                    latency: info.latency
-                });
-                strategies.push(new sequential_strategy_SequentialStrategy([transport], {
-                    timeout: info.latency * 2 + 1000,
-                    failFast: true
-                }));
+                if (['ws', 'wss'].includes(info.transport) || cacheSkipCount > 3) {
+                    this.timeline.info({
+                        cached: true,
+                        transport: info.transport,
+                        latency: info.latency
+                    });
+                    strategies.push(new sequential_strategy_SequentialStrategy([transport], {
+                        timeout: info.latency * 2 + 1000,
+                        failFast: true
+                    }));
+                }
+                else {
+                    cacheSkipCount++;
+                }
             }
         }
         var startTimestamp = util.now();
@@ -6831,7 +6838,7 @@ class cached_strategy_CachedStrategy {
                 }
             }
             else {
-                storeTransportCache(usingTLS, handshake.transport.name, util.now() - startTimestamp);
+                storeTransportCache(usingTLS, handshake.transport.name, util.now() - startTimestamp, cacheSkipCount);
                 callback(null, handshake);
             }
         });
@@ -6866,14 +6873,15 @@ function fetchTransportCache(usingTLS) {
     }
     return null;
 }
-function storeTransportCache(usingTLS, transport, latency) {
+function storeTransportCache(usingTLS, transport, latency, cacheSkipCount) {
     var storage = runtime.getLocalStorage();
     if (storage) {
         try {
             storage[getTransportCacheKey(usingTLS)] = safeJSONStringify({
                 timestamp: util.now(),
                 transport: transport,
-                latency: latency
+                latency: latency,
+                cacheSkipCount: cacheSkipCount
             });
         }
         catch (e) {
@@ -7044,7 +7052,7 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
             new delayed_strategy_DelayedStrategy(http_fallback_loop, { delay: 5000 })
         ]);
     }
-    return new cached_strategy_CachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_fallback_loop)), definedTransports, {
+    return new websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_fallback_loop)), definedTransports, {
         ttl: 1800000,
         timeline: baseOptions.timeline,
         useTLS: baseOptions.useTLS

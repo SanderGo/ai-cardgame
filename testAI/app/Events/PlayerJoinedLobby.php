@@ -23,7 +23,7 @@ class PlayerJoinedLobby implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        return new PresenceChannel('room.' . $this->roomCode);
+        return new PresenceChannel('presence-room.' . $this->roomCode);
     }
 
     public function broadcastAs()

@@ -14,39 +14,55 @@
         }, 10);
     </script>
     <script type="text/javascript">
-        function roomGrab() {
-            var roomInput = document.getElementById("code").value.trim();
+    function roomGrab() {
+        var roomInput = document.getElementById("code").value.trim();
 
-            // Check if roomInput has exactly 5 characters
-            if (roomInput.length !== 5) {
-                alert('Please enter a valid room code with exactly 5 characters.');
-                return;
-            }
-
-            if (roomInput !== '') {
-                fetch('/join-room', { 
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ roomCode: roomInput })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data.success); // Room code set successfully
-                    window.location.href = '{{ route('lobby') }}'; // Redirect to the lobby page
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-            } else {
-                alert('Please enter a valid room code.');
-            }
+        // Check if roomInput has exactly 5 characters
+        if (roomInput.length !== 5) {
+            alert('Please enter a valid room code with exactly 5 characters.');
+            return;
         }
-    </script>
 
-    <<script src="{{ asset('js/stringInput.js') }}"></script>
+        if (roomInput !== '') {
+            fetch('/join-room', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ 
+                    roomCode: roomInput,
+                    action: 'join' // Add this line to specify the action
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("HTTP error " + response.status);
+                }
+                return response.json(); 
+            })
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    console.log(data.success); // Room code set successfully
+                    // Store room code in session or localStorage
+                    localStorage.setItem('roomCode', roomInput);
+                    window.location.href = '{{ route('lobby') }}'; // Redirect to the lobby page
+                }
+            })
+
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        } else {
+            alert('Please enter a valid room code.');
+        }
+    }
+</script>
+
+
+    <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>
 <body>
     <div id="titleContainer">
