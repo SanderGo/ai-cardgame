@@ -15,8 +15,9 @@ window.Echo = new Echo({
     encrypted: false,
     scheme: 'https',
 });
-  
-window.Echo.join(`presence-${localStorage.getItem("roomCode")}`)
+
+
+window.Echo.join(`room.${localStorage.getItem("roomCode")}`)
     .here((users) => {
         console.log('Users in channel:', users);
     })

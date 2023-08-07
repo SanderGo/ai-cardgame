@@ -8,63 +8,61 @@
     <script src="{{ mix('js/app.js') }}"></script>
     <title>AI:OH</title>
     <script type="text/javascript">
-    function joinLobby() {
-    var userNameInput = document.getElementById("player_name").value.trim();
+        async function joinLobby() {
+            var playerNameInput = document.getElementById("player_name").value.trim();
 
-    // Check if the name is not empty
-    if (userNameInput === '') {
-        alert('Please enter a nickname.');
-        return;
-    }
+            // Check if the name is not empty
+            if (playerNameInput === '') {
+                alert('Please enter a nickname.');
+                return;
+            }
 
-    // Create a new room
-    fetch('/join', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({
-            player_name: userNameInput
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Check if the server returned an error
-        if (data.error) {
-            alert(data.error);
-            return;
+            try {
+                const response = await fetch('/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: JSON.stringify({
+                        player_name: playerNameInput
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                // Player joined successfully, store playerName and roomCode in localStorage
+                localStorage.setItem('playerName', playerNameInput);
+                localStorage.setItem('roomCode', data.roomCode);
+
+                // Join the presence channel using the roomCode
+                window.Echo.join(`presence-${localStorage.getItem("roomCode")}`)
+                    .here((users) => {
+                        console.log('Users in channel:', users);
+                    })
+                    .joining((user) => {
+                        console.log('A new user joined:', user.name);
+                    })
+                    .leaving((user) => {
+                        console.log('A user left:', user.name);
+                    })
+                    .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
+                        console.log('Player joined:', event.playerName);
+                    });
+
+                // Redirect to the lobby page
+                window.location.href = '/lobby';
+            } catch (error) {
+                console.error('Error fetching:', error);
+                alert('An error occurred. Please try again.');
+            }
         }
-
-        // Player joined successfully, store playerName and roomCode in localStorage
-        localStorage.setItem('playerName', userNameInput);
-        localStorage.setItem('roomCode', data.roomCode);
-
-        // Join the presence channel using the roomCode
-        window.Echo.join(`presence-${data.roomCode}`)
-
-            .here((users) => {
-                // Update the player list with the current users in the room
-                updatePlayerList(users);
-            })
-
-            .joining((user) => {
-                // A new user has joined the room, update the player list
-                updatePlayerList([...window.Echo.presenceChannel(`presence-${data.roomCode}`).users, user]);
-            })
-
-            .leaving((user) => {
-                // A user has left the room, update the player list
-                updatePlayerList([...window.Echo.presenceChannel(`presence-${data.roomCode}`).users].filter(u => u.id !== user.id));
-            })
-
-            .listen('GameStarted', (event) => {
-                // The game has started, redirect to the game page
-                window.location.href = `/game/${data.roomCode}`;
-            });
-    });
-}
-</script>
+    </script>
 
     <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>
