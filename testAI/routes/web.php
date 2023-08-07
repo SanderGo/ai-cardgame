@@ -44,7 +44,22 @@ Route::get('/lobby', function () {
     }
 })->name('lobby');
 
-Route::post('/join', [GameController::class, 'joinGame'])->name('join');
+//Route::post('/join', [GameController::class, 'joinGame'])->name('join');
+
+Route::post('/join', function (Request $request) {
+    $playerName = $request->input('player_name');
+
+    // Generate a unique room code
+    $roomCode = substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 0, 4);
+
+    // Store the room code and player name in Redis
+    Redis::set("roomCode:$roomCode", $roomCode);
+    Redis::hset("room:$roomCode", $request->session()->getId(), $playerName);
+
+    return response()->json([
+        'roomCode' => $roomCode
+    ]);
+});
 
 Route::get('/game', function () {
     $roomCode = Redis::get('roomCode');

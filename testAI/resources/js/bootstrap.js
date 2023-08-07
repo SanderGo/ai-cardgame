@@ -16,7 +16,7 @@ window.Echo = new Echo({
     scheme: 'https',
 });
   
-window.Echo.join(`presence-room.${localStorage.getItem("roomCode")}`)
+window.Echo.join(`presence-${localStorage.getItem("roomCode")}`)
     .here((users) => {
         console.log('Users in channel:', users);
     })
@@ -26,7 +26,6 @@ window.Echo.join(`presence-room.${localStorage.getItem("roomCode")}`)
     .leaving((user) => {
         console.log('A user left:', user.name);
     })
-    .listen('.PlayerJoinedLobby', (event) => {
-        // Here, instead of "playerName", you should use the actual data property name sent by the server.
-        console.log('Player joined:', event.playerName); 
+    .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
+        console.log('Player joined:', event.playerName);
     });

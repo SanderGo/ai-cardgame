@@ -9,68 +9,61 @@
     <title>AI:OH</title>
     <script type="text/javascript">
     function joinLobby() {
-        var userNameInput = document.getElementById("player_name").value.trim();
+    var userNameInput = document.getElementById("player_name").value.trim();
 
-        // Check if the name is not empty
-        if (userNameInput === '') {
-            alert('Please enter a nickname.');
+    // Check if the name is not empty
+    if (userNameInput === '') {
+        alert('Please enter a nickname.');
+        return;
+    }
+
+    // Create a new room
+    fetch('/join', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+            player_name: userNameInput
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Check if the server returned an error
+        if (data.error) {
+            alert(data.error);
             return;
         }
 
-        // Create a new room
-        fetch('/join', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({
-                player_name: userNameInput
+        // Player joined successfully, store playerName and roomCode in localStorage
+        localStorage.setItem('playerName', userNameInput);
+        localStorage.setItem('roomCode', data.roomCode);
+
+        // Join the presence channel using the roomCode
+        window.Echo.join(`presence-${data.roomCode}`)
+
+            .here((users) => {
+                // Update the player list with the current users in the room
+                updatePlayerList(users);
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Check if the server returned an error
-            if (data.error) {
-                alert(data.error);
-                return;
-            }
 
-            // Player joined successfully, store playerName and roomCode in localStorage
-            localStorage.setItem('playerName', userNameInput);
-            localStorage.setItem('roomCode', data.roomCode);
+            .joining((user) => {
+                // A new user has joined the room, update the player list
+                updatePlayerList([...window.Echo.presenceChannel(`presence-${data.roomCode}`).users, user]);
+            })
 
-            // Join the presence channel using the roomCode
-            window.Echo.join(`presence-room.${data.roomCode}`)
+            .leaving((user) => {
+                // A user has left the room, update the player list
+                updatePlayerList([...window.Echo.presenceChannel(`presence-${data.roomCode}`).users].filter(u => u.id !== user.id));
+            })
 
-                .here((users) => {
-                    console.log('Users in channel:', users);
-                })
-                .joining((user) => {
-                    console.log('A new user joined:', user.name);
-                })
-                .leaving((user) => {
-                    console.log('A user left:', user.name);
-                })
-                .listen('.PlayerJoinedLobby', (event) => {
-                    // Here, instead of "playerName", you should use the actual data property name sent by the server.
-                    console.log('Player joined:', event.playerName); 
-                });
-
-                const isAuthenticated = localStorage.getItem('playerName') !== null && localStorage.getItem('roomCode') !== null;
-
-            if (isAuthenticated) {
-                // Redirect to the lobby page
-                window.location.href = '{{ route('lobby') }}';
-            } else {
-                // Handle the case when the user is not authenticated (e.g., display an error message)
-                console.error('User is not authenticated.');
-            }
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    }
+            .listen('GameStarted', (event) => {
+                // The game has started, redirect to the game page
+                window.location.href = `/game/${data.roomCode}`;
+            });
+    });
+}
 </script>
 
     <script src="{{ asset('js/stringInput.js') }}"></script>

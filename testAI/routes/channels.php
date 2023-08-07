@@ -21,7 +21,7 @@ Broadcast::channel('lobby', function ($user) {
     return true; // Adjust the logic to check authorization if needed
 });
 
-Broadcast::channel('presence-room.{roomCode}', function ($user, $roomCode) {
+Broadcast::channel('{roomCode}', function ($user, $roomCode) {
     // Allow public access to the presence channel without authentication
     return true;
 });
