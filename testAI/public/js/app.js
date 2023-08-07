@@ -36,10 +36,10 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   broadcaster: 'pusher',
   key: "4c231fdc01a893cb3773",
   cluster: "us2",
-  encrypted: true,
+  encrypted: false,
   scheme: 'https'
 });
-window.Echo.join("room.".concat(localStorage.getItem("roomCode"))).here(function (users) {
+window.Echo.join("presence-room.".concat(localStorage.getItem("roomCode"))).here(function (users) {
   console.log('Users in channel:', users);
 }).joining(function (user) {
   console.log('A new user joined:', user.name);
