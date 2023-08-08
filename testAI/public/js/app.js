@@ -37,17 +37,23 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   key: "4c231fdc01a893cb3773",
   cluster: "us2",
   encrypted: false,
-  scheme: 'https'
+  scheme: 'http',
+  authEndpoint: '/broadcasting/auth'
 });
-window.Echo.join("room.".concat(localStorage.getItem("roomCode"))).here(function (users) {
-  console.log('Users in channel:', users);
-}).joining(function (user) {
-  console.log('A new user joined:', user.name);
-}).leaving(function (user) {
-  console.log('A user left:', user.name);
-}).listen('.App\\Events\\PlayerJoinedLobby', function (event) {
-  console.log('Player joined:', event.playerName);
-});
+
+// window.Echo.join(`presence-room.${sessionStorage.getItem("roomCode")}`)
+//     .here((users) => {
+//         console.log('Users in channel:', users);
+//     })
+//     .joining((user) => {
+//         console.log('A new user joined:', user.name);
+//     })
+//     .leaving((user) => {
+//         console.log('A user left:', user.name);
+//     })
+//     .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
+//         console.log('Player joined:', event.playerName);
+//     });
 
 /***/ }),
 

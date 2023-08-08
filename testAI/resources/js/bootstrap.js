@@ -13,20 +13,21 @@ window.Echo = new Echo({
     key: process.env.MIX_PUSHER_APP_KEY,
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
     encrypted: false,
-    scheme: 'https',
+    scheme: 'http',
+    authEndpoint: '/broadcasting/auth',
 });
 
 
-window.Echo.join(`room.${localStorage.getItem("roomCode")}`)
-    .here((users) => {
-        console.log('Users in channel:', users);
-    })
-    .joining((user) => {
-        console.log('A new user joined:', user.name);
-    })
-    .leaving((user) => {
-        console.log('A user left:', user.name);
-    })
-    .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
-        console.log('Player joined:', event.playerName);
-    });
+// window.Echo.join(`presence-room.${sessionStorage.getItem("roomCode")}`)
+//     .here((users) => {
+//         console.log('Users in channel:', users);
+//     })
+//     .joining((user) => {
+//         console.log('A new user joined:', user.name);
+//     })
+//     .leaving((user) => {
+//         console.log('A user left:', user.name);
+//     })
+//     .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
+//         console.log('Player joined:', event.playerName);
+//     });

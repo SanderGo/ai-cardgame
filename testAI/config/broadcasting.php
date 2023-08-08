@@ -30,6 +30,7 @@ return [
 
     'connections' => [
 
+
         'pusher' => [
             'driver' => 'pusher',
             'key' => env('PUSHER_APP_KEY'),
@@ -37,8 +38,9 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'encrypted' => false,
-                'scheme' => 'http'
+                'useTLS' => false,    // You specified no TLS
+                'encrypted' => false, // Using http, so not encrypted
+                'scheme' => 'http'    // Using http scheme
             ],
         ],
 

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GameController;
 use App\Http\Controllers\RoomController;
+use App\Events\PlayerJoinedLobby;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,8 +23,9 @@ Route::get('create', [RoomController::class, 'createRoom'])->name('create');
 Route::post('set-code', [RoomController::class, 'setRoomCode'])->name('set-room-code');
 Route::get('code', [RoomController::class, 'getRoomCode'])->name('get-room-code');
 Route::get('lobby', [RoomController::class, 'viewLobby'])->name('lobby');
-Route::post('join-room', [RoomController::class, 'joinRoom'])->name('join-room');
+Route::post('join', [RoomController::class, 'joinRoom'])->name('joinRoom');
 Route::post('update-player', [RoomController::class, 'updatePlayer'])->name('update-player');
+Route::post('set-player-name', [RoomController::class, 'setPlayerName']);
 
 // Game routes
 Route::get('game', [GameController::class, 'viewGame'])->name('game');
@@ -31,5 +33,4 @@ Route::post('game/join', [GameController::class, 'joinGame'])->name('join');
 
 // Broadcasting routes
 Route::post('/broadcasting/auth', [RoomController::class, 'authChannel'])->withoutMiddleware(['csrf']);
-
 

@@ -12,7 +12,7 @@
             roomCode: @json($roomCode),
             uuid: @json($uuid),
         }
-        localStorage.setItem('roomCode', playerData.roomCode);
+        sessionStorage.setItem('roomCode', playerData.roomCode);
         async function joinLobby() {
             var playerNameInput = document.getElementById("player_name").value.trim();
 
@@ -22,9 +22,9 @@
             }
 
             // Using the embedded playerData
-            localStorage.setItem('playerName', playerNameInput);
+            sessionStorage.setItem('playerName', playerNameInput);
 
-            localStorage.setItem('uuid', playerData.uuid);
+            sessionStorage.setItem('uuid', playerData.uuid);
 
             // Make an async request to Laravel to save player name and UUID in Redis
             try {

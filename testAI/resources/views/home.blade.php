@@ -18,47 +18,6 @@
             clearInterval(interval);
         };
     </script>
-    <script>
-        localStorage.clear();
-        async function joinRoomInput() {
-            const roomInput = document.getElementById("roomCodeInput").value.trim();
-
-            if (roomInput.length !== 5) {
-                alert('Please enter a valid room code with exactly 5 characters.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/join-room', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        roomCode: roomInput
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error("HTTP error " + response.status);
-                }
-
-                const data = await response.json();
-                if (data.error) {
-                    alert(data.error);
-                } else {
-                    localStorage.setItem('roomCode', roomInput);
-                    window.location.href = '{{ route('lobby') }}';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
-            }
-        }
-
-
-    </script>
     <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>
 <body>
@@ -67,14 +26,24 @@
         <h1>An AI Card Game For Small Businesses</h1>
     </div>
     <div id="center">
+        <!-- Displaying the error message if any -->
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div> 
             <button onclick="location.href='{{ route('create') }}'" class="btn btn-light custom-button1">CREATE A ROOM</button>
         </div>
         <br>
-        <div> 
-            <button onclick="joinRoomInput()" class="btn btn-light custom-button1">JOIN A ROOM</button>
-        </div>
-        <input class="form-control input1" type="text" id="roomCodeInput" placeholder="Enter Room Code Here!" onfocus="this.value=''" onkeypress="return isAlphanumeric(event)">
+        
+        <!-- Form for joining a room -->
+        <form action="/join" method="post">
+            @csrf
+            <button type="submit" class="btn btn-light custom-button1">JOIN A ROOM</button>
+            <input class="form-control input1" type="text" id="roomCodeInput" name="roomCode" placeholder="Enter Room Code Here!" onfocus="this.value=''" onkeypress="return isAlphanumeric(event)">
+        </form>
     </div>
 </body>
 </html>

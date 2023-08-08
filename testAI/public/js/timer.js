@@ -1,6 +1,6 @@
 function submitAnswer() {
     var userInput = document.getElementById("code").value;
-    localStorage.setItem("userInput", userInput);
+    sessionStorage.setItem("userInput", userInput);
     window.location.href = nextUrl;
 }
 
