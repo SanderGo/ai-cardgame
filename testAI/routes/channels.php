@@ -25,3 +25,7 @@ Broadcast::channel('{roomCode}', function ($user, $roomCode) {
     // Allow public access to the presence channel without authentication
     return true;
 });
+
+Broadcast::channel('presence-room.{roomCode}', function ($user, $roomCode) {
+    return true; 
+});

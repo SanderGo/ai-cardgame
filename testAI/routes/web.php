@@ -18,14 +18,18 @@ use App\Http\Controllers\RoomController;
 Route::get('/', fn() => view('home'))->name('home');
 
 // Room routes
-Route::get('create', [RoomController::class, 'joinOrCreateRoom'])->name('create');
+Route::get('create', [RoomController::class, 'createRoom'])->name('create');
 Route::post('set-code', [RoomController::class, 'setRoomCode'])->name('set-room-code');
 Route::get('code', [RoomController::class, 'getRoomCode'])->name('get-room-code');
 Route::get('lobby', [RoomController::class, 'viewLobby'])->name('lobby');
-Route::post('join-room', [RoomController::class, 'joinOrCreateRoom'])->name('join-room');
+Route::post('join-room', [RoomController::class, 'joinRoom'])->name('join-room');
+Route::post('update-player', [RoomController::class, 'updatePlayer'])->name('update-player');
 
 // Game routes
 Route::get('game', [GameController::class, 'viewGame'])->name('game');
 Route::post('game/join', [GameController::class, 'joinGame'])->name('join');
 
-Route::post('/broadcasting/auth', fn() => Auth::check() ? Auth::user() : abort(403));
+// Broadcasting routes
+Route::post('/broadcasting/auth', [RoomController::class, 'authChannel'])->withoutMiddleware(['csrf']);
+
+

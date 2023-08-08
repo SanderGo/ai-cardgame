@@ -42,7 +42,7 @@
         let roomCode = localStorage.getItem('roomCode'); // get room code from localStorage
         let currentRoomCode = roomCode;
 
-        Echo.channel('presence-' + roomCode)
+        Echo.channel('presence-room.' + roomCode)
             .listen('PlayerJoinedLobby', (e) => {
                 console.log(e.playerListJson);
                 try {

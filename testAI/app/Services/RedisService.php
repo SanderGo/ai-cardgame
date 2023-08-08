@@ -23,6 +23,7 @@ class RedisService
 
     public function setRoomCode(string $roomCode)
     {
+        \Log::info('Setting room code: ' . $roomCode);
         Redis::set('roomCode', $roomCode);
     }
 

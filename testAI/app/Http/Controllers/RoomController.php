@@ -2,18 +2,15 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Str;
+use App\Services\RedisService;
+use Ramsey\Uuid\Uuid;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Routing\Controller as BaseController;
-use App\Helpers\RoomCodeGenerator;
-use App\Events\PlayerJoinedLobby;
-use Illuminate\Support\Facades\Session;
-use App\Http\Controllers\View;
-use Illuminate\Support\Str;
 
 class Controller extends BaseController
 {
@@ -22,48 +19,58 @@ class Controller extends BaseController
 
 class RoomController extends Controller
 {
-    const CHARACTER_SET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    protected $redisService;
 
-    public function generateRoomCode(Request $request)
+    public function __construct(RedisService $redisService)
     {
-        $roomCode = $this->redisService->getRoomCode();
-            if (!$roomCode) {
-                $roomCode = Str::upper(Str::random(5));
-                $this->redisService->setRoomCode($roomCode);
-            }
+        $this->redisService = $redisService;
+    }
 
+    public function generateRoomCode()
+    {
+        do {
+            $roomCode = Str::upper(Str::random(5));
+        } while (Redis::sismember('rooms', $roomCode));
+        
+        $this->redisService->setRoomCode($roomCode);
+        \Log::info('Room code lol: ' . $roomCode);
+        
         return $roomCode;
     }
 
 
-    public function joinOrCreateRoom(Request $request)
-    {
-        $action = $request->input('action');
-        $roomCode = $request->input('roomCode');
-        $playerName = $request->input('playerName');
-        $playerId = $request->session()->getId();
-        $nickname = $request->input('nickname');
+    public function createRoom(Request $request) {
+        $roomCode = $this->generateRoomCode();
+        $uuid = Uuid::uuid4()->toString();
+        
+        Redis::sadd('rooms', $roomCode); // Add to room set
+        Redis::sadd("room:{$roomCode}:players", $uuid);
+        Redis::hmset("player:{$uuid}", [
+            'roomCode' => $roomCode,
+        ]);
+        return view('create', [
+            'roomCode' => $roomCode,
+            'uuid' => $uuid,
+        ]);
+    }
 
-        if ($action === 'join') {
-            if ($this->isRoomInSet($roomCode)) {
-                $this->redisService->addPlayerToRoom($roomCode, $playerId);
-                $this->redisService->setPlayerListForRoom("player:{$playerId}", [
-                    'nickname' => $nickname,
-                    'roomCode' => $roomCode,
-                ]);
-                return view('lobby', ['roomCode' => $roomCode]);
-            } else {
-                return redirect()->back()->with('error', 'Room not found');
-            }
-        } else {
-            $roomCode = $this->generateRoomCode();
-            Redis::sadd("room:{$roomCode}:players", $playerId);
-            Redis::hmset("player:{$playerId}", [
-                'nickname' => $nickname,
+    public function joinRoom(Request $request) {
+        $roomCode = $request->input('roomCode');
+        $uuid = Uuid::uuid4()->toString();
+
+        if ($this->isRoomInSet($roomCode)) {
+            $this->redisService->addPlayerToRoom($roomCode, $uuid);
+            return view('create', [
                 'roomCode' => $roomCode,
+                'uuid' => $uuid,            
             ]);
-            return view('create', ['roomCode' => $roomCode]);
+        } else {
+            return redirect()->back()->with('error', 'Room not found');
         }
+    }
+
+    private function isRoomInSet($roomCode) {
+        return Redis::sismember('rooms', $roomCode);
     }
 
     public function setRoomCode(Request $request)
@@ -82,10 +89,51 @@ class RoomController extends Controller
         }
     }
 
-    public function getRoomCode()
+    public function authChannel(Request $request)
     {
-        $roomCode = Redis::get('roomCode');
-        return response()->json(['roomCode' => $roomCode]);
+        $channelName = $request->input('channel_name');
+        \Log::info('Channel Name: ' . $channelName);
+
+        // Extract roomCode from channel_name
+        $roomCode = str_replace('presence-room.', '', $channelName);
+
+        $validRoomCodes = Redis::smembers('rooms');
+        \Log::info('Valid room codes: ' . json_encode($validRoomCodes));
+        
+        $isValidRoomCode = in_array($roomCode, $validRoomCodes);
+        \Log::info('Code: ' . $roomCode);
+        \Log::info('Is valid room code: ' . $isValidRoomCode);
+        
+        return response()->json(['isValidRoomCode' => $isValidRoomCode]);
     }
+
+    public function updatePlayer(Request $request)
+    {
+        $uuid = $request->input('uuid');
+        $playerName = $request->input('playerName');
+
+        // Assuming you're storing players in a hash in Redis:
+        Redis::hmset("player:{$uuid}", [
+            'playerName' => $playerName,
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function joinLobby(Request $request)
+    {
+        $playerName = $request->input('player_name');
+        $uuid = Uuid::uuid4()->toString(); // generate new uuid or use existing one if needed
+    
+        // Save player to Redis or your DB
+        // For example, if you use Redis:
+        Redis::hmset("player:{$uuid}", ['playerName' => $playerName]);
+        
+        // Return the list of all players in the room. You will have to fetch this info from Redis/DB
+        $playerList =  Redis::smembers("room:{$roomCode}:players");
+    
+        return response()->json(['success' => true, 'playerList' => $playerList]);
+    }
+    
 
 }

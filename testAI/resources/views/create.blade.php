@@ -5,65 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
-    <script src="{{ mix('js/app.js') }}"></script>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AI:OH</title>
-    <script type="text/javascript">
+    <script>
+        var playerData = {
+            roomCode: @json($roomCode),
+            uuid: @json($uuid),
+        }
+        localStorage.setItem('roomCode', playerData.roomCode);
         async function joinLobby() {
             var playerNameInput = document.getElementById("player_name").value.trim();
 
-            // Check if the name is not empty
             if (playerNameInput === '') {
                 alert('Please enter a nickname.');
                 return;
             }
 
+            // Using the embedded playerData
+            localStorage.setItem('playerName', playerNameInput);
+
+            localStorage.setItem('uuid', playerData.uuid);
+
+            // Make an async request to Laravel to save player name and UUID in Redis
             try {
-                const response = await fetch('/create', {
+                const response = await fetch('/update-player', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-Requested-With': 'XMLHttpRequest', // for Laravel's CSRF token
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: JSON.stringify({
-                        player_name: playerNameInput
+                        uuid: playerData.uuid,
+                        playerName: playerNameInput
                     })
                 });
 
                 const data = await response.json();
 
-                if (data.error) {
-                    alert(data.error);
-                    return;
+                if (data.success) {
+                    // Redirect to the lobby page
+                    window.location.href = '/lobby';
+                } else {
+                    alert('There was a problem joining the lobby. Please try again.');
                 }
-
-                // Player joined successfully, store playerName and roomCode in localStorage
-                localStorage.setItem('playerName', playerNameInput);
-                localStorage.setItem('roomCode', data.roomCode);
-
-                // Join the presence channel using the roomCode
-                window.Echo.join(`presence-${localStorage.getItem("roomCode")}`)
-                    .here((users) => {
-                        console.log('Users in channel:', users);
-                    })
-                    .joining((user) => {
-                        console.log('A new user joined:', user.name);
-                    })
-                    .leaving((user) => {
-                        console.log('A user left:', user.name);
-                    })
-                    .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
-                        console.log('Player joined:', event.playerName);
-                    });
-
-                // Redirect to the lobby page
-                window.location.href = '/lobby';
             } catch (error) {
-                console.error('Error fetching:', error);
-                alert('An error occurred. Please try again.');
+                alert('Error: ' + error);
             }
         }
-    </script>
 
+
+    </script>
+    <script src="{{ mix('js/app.js') }}"></script>
     <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>
 
