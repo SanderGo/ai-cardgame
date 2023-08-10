@@ -50,9 +50,9 @@
 
         // Display the current player's name
         addPlayerToList(playerName);
+
         console.log(sessionStorage.getItem('roomCode'));
         Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
-            console.log('Joined channel')
             .here((users) => {
                 console.log('Users in channel:', users);
             })
@@ -63,7 +63,6 @@
                 console.log('A user left:', user.name);
             })
             .listen('.PlayerJoinedLobby', (e) => {
-                console.log('Received PlayerJoinedLobby event:', e);
                     // Get the updated player list from the event data
                     let playerList = e.playerList;
                     // Clear the current player list in the HTML

@@ -59,9 +59,13 @@ class RoomController extends Controller
     public function joinRoom(Request $request)
     {
         $roomCode = $request->input('roomCode');
+        $playerName = $request->input('playerName');
 
         if ($this->isValidRoomCode($roomCode)) {
+
             $uuid = $this->associatePlayerWithRoom($roomCode);
+
+            event(new PlayerJoinedLobby($playerName, $roomCode));
 
             return view('create', [
                 'roomCode' => $roomCode,
@@ -79,7 +83,7 @@ class RoomController extends Controller
         $playerName = $request->input('player_name');
         
         Redis::hmset("player:{$uuid}", ['playerName' => $playerName]);
-        
+        \Log::info("Player {$playerName} joined room {$roomCode}");
         event(new PlayerJoinedLobby($playerName, $roomCode));
         
         return redirect()->route('lobby');
