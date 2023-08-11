@@ -39,10 +39,26 @@ class RoomController extends Controller
         return $roomCode;
     }
 
-    private function isValidRoomCode($roomCode)
+    private function isValidRoomCode()
     {
-        return Redis::sismember('active_rooms', $roomCode);
+        $uuid = session('uuid');
+        $playerData = Redis::hgetall("player:{$uuid}");
+        $playerName = $playerData['playerName'] ?? null;
+        $roomCode = $playerData['roomCode'] ?? null;
+
+
+        \Log::info("Checking if room code {$roomCode} is valid");
+
+        $activeRooms = Redis::smembers('active_rooms');
+
+        // Check if the roomCode is in the activeRooms array
+        $roomExists = in_array($roomCode, $activeRooms);
+
+        \Log::info("Room code exists: " . $roomExists);
+
+        return $roomExists;
     }
+
 
     public function createRoom(Request $request)
     {
@@ -60,12 +76,10 @@ class RoomController extends Controller
     {
         $roomCode = $request->input('roomCode');
         $playerName = $request->input('playerName');
-
+        \Log::info("Player {$playerName} is attempting to join room {$roomCode}");
         if ($this->isValidRoomCode($roomCode)) {
 
             $uuid = $this->associatePlayerWithRoom($roomCode);
-
-            event(new PlayerJoinedLobby($playerName, $roomCode));
 
             return view('create', [
                 'roomCode' => $roomCode,
@@ -84,9 +98,8 @@ class RoomController extends Controller
         
         Redis::hmset("player:{$uuid}", ['playerName' => $playerName]);
         \Log::info("Player {$playerName} joined room {$roomCode}");
-        event(new PlayerJoinedLobby($playerName, $roomCode));
         
-        return redirect()->route('lobby');
+        return redirect()->route('lobby', $uuid);
     }
     
     private function associatePlayerWithRoom($roomCode)
@@ -102,30 +115,98 @@ class RoomController extends Controller
         return $uuid;
     }
 
-    public function viewLobby()
-    {
-        return view('lobby');
-    }
-    
-    public function authChannel(Request $request)
-    {
-        $channelName = $request->input('channel_name');
-        $roomCode = str_replace('room.', '', $channelName);
-        $isValidRoomCode = $this->isValidRoomCode($roomCode);
+    // public function viewLobby($uuid)
+    // {
+    //     // Retrieve the playerName and roomCode from Redis using the UUID.
+    //     $playerData = Redis::hgetall("player:{$uuid}");
+    //     $playerName = $playerData['playerName'] ?? null;
+    //     $roomCode = $playerData['roomCode'] ?? null;
 
-        return response()->json(['isValidRoomCode' => $isValidRoomCode]);
-    }
-
+    //     if($playerName && $roomCode) {
+    //         event(new PlayerJoinedLobby($playerName, $roomCode));
+    //         return view('lobby');
+    //     } else {
+    //         // Handle error. Maybe redirect back with an error message.
+    //         return redirect()->back()->with('error', 'Failed to load lobby. Please try again.');
+    //     }
+    // }
     public function updatePlayer(Request $request)
     {
         $uuid = $request->input('uuid');
         $playerName = $request->input('playerName');
 
+        // Store the UUID in Laravel's session
+        session(['uuid' => $uuid]);
+
+        // Save the playerName in Redis
         Redis::hmset("player:{$uuid}", [
             'playerName' => $playerName,
         ]);
 
         return response()->json(['success' => true]);
     }
+
+    public function viewLobby() 
+    {
+        // Get the UUID from Laravel's session
+        $uuid = session('uuid');
+        
+        // If, for some reason, uuid isn't in the session, redirect back with an error
+        if (!$uuid) {
+            return redirect()->back()->with('error', 'Session expired or invalid UUID.');
+        }
+        // Retrieve the playerName and roomCode from Redis using the UUID
+        $playerData = Redis::hgetall("player:{$uuid}");
+        $playerName = $playerData['playerName'] ?? null;
+        $roomCode = $playerData['roomCode'] ?? null;
+
+        if ($playerName && $roomCode) {
+            event(new PlayerJoinedLobby($playerName, $roomCode));
+            return view('lobby');
+        } else {
+            return redirect()->back()->with('error', 'Failed to load lobby. Please try again.');
+        }
+    }
+
+
+    
+    public function authChannel(Request $request)
+    {
+        $channelName = $request->input('channel_name');
+        $roomCode = $channelName;
+        $isValidRoomCode = $this->isValidRoomCode($roomCode);
+        \Log::info("Authenticating channel {$channelName} for room {$roomCode}. Valid room code: {$isValidRoomCode}");
+
+        return response()->json(['isValidRoomCode' => $isValidRoomCode]);
+    }
+
+
+    public function clientJoinedChannel(Request $request) {
+        // Retrieve data from the client request.
+        $uuid = $request->input('uuid');
+        $roomCode = $request->input('roomCode');
+        
+        // Get the player's name from Redis using the UUID.
+        $playerData = Redis::hgetall("player:{$uuid}");
+        $playerName = $playerData['playerName'] ?? null;
+
+        if ($playerName && $roomCode) {
+            event(new PlayerJoinedLobby($playerName, $roomCode));
+            return response()->json(['success' => true]);
+        } else {
+            return response()->json(['error' => 'Failed to fire PlayerJoinedLobby event.'], 400);
+        }
+    }
+    // public function updatePlayer(Request $request)
+    // {
+    //     $uuid = $request->input('uuid');
+    //     $playerName = $request->input('playerName');
+
+    //     Redis::hmset("player:{$uuid}", [
+    //         'playerName' => $playerName,
+    //     ]);
+
+    //     return response()->json(['success' => true]);
+    // }
 
 }

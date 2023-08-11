@@ -35,13 +35,11 @@ class PlayerJoinedLobby implements ShouldBroadcastNow
         return 'PlayerJoinedLobby';
     }
 
-    public function broadcastWith()
-    {
-        $playerList = Redis::smembers("room:{$this->roomCode}:players");
-        return ['playerName' => $this->playerName, 'playerList' => $playerList];
-    }
+    // public function broadcastWith()
+    // {
+    //     $playerList = Redis::smembers("room:{$this->roomCode}:players");
+    //     \Log::info("PlayerJoinedLobby Event broadcastWith: " . json_encode($playerList));
+    //     return ['playerName' => $this->playerName, 'playerList' => $playerList];
+    // }
 }
 
-//Creating broadcast within the function that I want to be called. Should already be on the channel that it's actually creating
-//Thinking I need to move it within the RoomController.php file
-//EVENT IS RUNNING NOW

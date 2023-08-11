@@ -22,10 +22,8 @@ Broadcast::channel('lobby', function ($user) {
 });
 
 Broadcast::channel('room.{roomCode}', function ($user, $roomCode) {
-    if ($user) {
-        return [
-            'uuid' => $user->uuid,
-            'player_name' => $user->name
-        ];
-    }
+    return [
+        'uuid' => $user->uuid,
+        'player_name' => $user->name
+    ];
 });

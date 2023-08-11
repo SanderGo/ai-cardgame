@@ -38,22 +38,39 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   cluster: "us2",
   encrypted: false,
   scheme: 'http',
-  authEndpoint: '/broadcasting/auth'
+  authEndpoint: '/broadcasting/auth',
+  forceTLS: true
 });
+window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(function (users) {
+  isConnected = true; // Set the flag to true when connected
 
-// window.Echo.join(`presence-room.${sessionStorage.getItem("roomCode")}`)
-//     .here((users) => {
-//         console.log('Users in channel:', users);
-//     })
-//     .joining((user) => {
-//         console.log('A new user joined:', user.name);
-//     })
-//     .leaving((user) => {
-//         console.log('A user left:', user.name);
-//     })
-//     .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
-//         console.log('Player joined:', event.playerName);
-//     });
+  console.log('Users here:', users);
+  users.forEach(function (user) {
+    addPlayerToList(user.name);
+  });
+}).joining(function (user) {
+  console.log('A new user joined:', user.name);
+}).leaving(function (user) {
+  removePlayerFromList(user.name);
+  console.log('A user left:', user.name);
+}).listen('PlayerJoinedLobby', function (e) {
+  if (!isConnected) {
+    console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
+    return;
+  }
+  console.log('Player joined lobby:', e.playerName);
+
+  // Get the updated player list from the event data
+  var playerList = e.playerList;
+  // Clear the current player list in the HTML
+  var playerListElement = document.getElementById('player-list');
+  playerListElement.innerHTML = '';
+
+  // Loop through the player list and add players to the HTML
+  playerList.forEach(function (player) {
+    addPlayerToList(player);
+  });
+});
 
 /***/ }),
 

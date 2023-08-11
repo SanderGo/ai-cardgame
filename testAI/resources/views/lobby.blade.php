@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <title>Lobby</title>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
-    <script src="{{ asset('/js/app.js') }}"></script>
+    
 </head>
 
 <body>
@@ -46,34 +46,50 @@
     <script>
         let playerName = sessionStorage.getItem('playerName');
         let roomCode = sessionStorage.getItem('roomCode');
+        let isConnected = false; // Flag to check if the client is connected
+
         document.getElementById('room-code').textContent = roomCode;
 
         // Display the current player's name
         addPlayerToList(playerName);
 
         console.log(sessionStorage.getItem('roomCode'));
-        Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
-            .here((users) => {
-                console.log('Users in channel:', users);
-            })
-            .joining((user) => {
-                console.log('A new user joined:', user.name);
-            })
-            .leaving((user) => {
-                console.log('A user left:', user.name);
-            })
-            .listen('.PlayerJoinedLobby', (e) => {
-                    // Get the updated player list from the event data
-                    let playerList = e.playerList;
-                    // Clear the current player list in the HTML
-                    let playerListElement = document.getElementById('player-list');
-                    playerListElement.innerHTML = '';
+        
+        // Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
+        //     .here((users) => {
+        //         isConnected = true; // Set the flag to true when connected
 
-                    // Loop through the player list and add players to the HTML
-                    playerList.forEach(player => {
-                        addPlayerToList(player);
-                    });
-                });
+        //         console.log('Users here:', users);
+        //         users.forEach(user => {
+        //             addPlayerToList(user.name);
+        //         });
+        //     })
+        //     .joining((user) => {
+        //         console.log('A new user joined:', user.name);
+        //     })
+        //     .leaving((user) => {
+        //         removePlayerFromList(user.name);
+        //         console.log('A user left:', user.name);
+        //     })
+        //     .listen('PlayerJoinedLobby', (e) => {
+        //         if (!isConnected) {
+        //             console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
+        //             return;
+        //         }
+
+        //         console.log('Player joined lobby:', e.playerName);
+                
+        //         // Get the updated player list from the event data
+        //         let playerList = e.playerList;
+        //         // Clear the current player list in the HTML
+        //         let playerListElement = document.getElementById('player-list');
+        //         playerListElement.innerHTML = '';
+
+        //         // Loop through the player list and add players to the HTML
+        //         playerList.forEach(player => {
+        //             addPlayerToList(player);
+        //         });
+        //     });
 
         function addPlayerToList(newPlayerName) {
             let playerListElement = document.getElementById('player-list');
@@ -81,6 +97,19 @@
             listItem.textContent = newPlayerName;
             playerListElement.appendChild(listItem);
         }
+
+        function removePlayerFromList(playerNameToRemove) {
+            let playerListElement = document.getElementById('player-list');
+            let listItems = playerListElement.getElementsByTagName('li');
+            for (let item of listItems) {
+                if (item.textContent === playerNameToRemove) {
+                    playerListElement.removeChild(item);
+                    break;
+                }
+            } 
+        }
+
     </script>
+    <script src="{{ asset('/js/app.js') }}"></script>
 </body>
 </html>

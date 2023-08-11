@@ -15,19 +15,42 @@ window.Echo = new Echo({
     encrypted: false,
     scheme: 'http',
     authEndpoint: '/broadcasting/auth',
+    forceTLS: true,
 });
 
 
-// window.Echo.join(`presence-room.${sessionStorage.getItem("roomCode")}`)
-//     .here((users) => {
-//         console.log('Users in channel:', users);
-//     })
-//     .joining((user) => {
-//         console.log('A new user joined:', user.name);
-//     })
-//     .leaving((user) => {
-//         console.log('A user left:', user.name);
-//     })
-//     .listen('.App\\Events\\PlayerJoinedLobby', (event) => {
-//         console.log('Player joined:', event.playerName);
-//     });
+window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
+    .here((users) => {
+        isConnected = true; // Set the flag to true when connected
+
+        console.log('Users here:', users);
+        users.forEach(user => {
+            addPlayerToList(user.name);
+        });
+    })
+    .joining((user) => {
+        console.log('A new user joined:', user.name);
+    })
+    .leaving((user) => {
+        removePlayerFromList(user.name);
+        console.log('A user left:', user.name);
+    })
+    .listen('PlayerJoinedLobby', (e) => {
+        if (!isConnected) {
+            console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
+            return;
+        }
+
+        console.log('Player joined lobby:', e.playerName);
+        
+        // Get the updated player list from the event data
+        let playerList = e.playerList;
+        // Clear the current player list in the HTML
+        let playerListElement = document.getElementById('player-list');
+        playerListElement.innerHTML = '';
+
+        // Loop through the player list and add players to the HTML
+        playerList.forEach(player => {
+            addPlayerToList(player);
+        });
+    });

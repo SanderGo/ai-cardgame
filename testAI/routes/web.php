@@ -26,6 +26,8 @@ Route::get('lobby', [RoomController::class, 'viewLobby'])->name('lobby');
 Route::post('join', [RoomController::class, 'joinRoom'])->name('joinRoom');
 Route::post('update-player', [RoomController::class, 'updatePlayer'])->name('update-player');
 Route::post('set-player-name', [RoomController::class, 'setPlayerName']);
+Route::post('/client-joined-channel', [RoomController::class, 'clientJoinedChannel']);
+
 
 // Game routes
 Route::get('game', [GameController::class, 'viewGame'])->name('game');
