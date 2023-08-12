@@ -36,10 +36,9 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   broadcaster: 'pusher',
   key: "4c231fdc01a893cb3773",
   cluster: "us2",
-  encrypted: false,
-  scheme: 'http',
-  authEndpoint: '/broadcasting/auth',
-  forceTLS: true
+  useTLS: true,
+  scheme: 'https',
+  authEndpoint: '/broadcasting/auth'
 });
 window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(function (users) {
   isConnected = true; // Set the flag to true when connected

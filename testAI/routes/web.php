@@ -32,7 +32,3 @@ Route::post('/client-joined-channel', [RoomController::class, 'clientJoinedChann
 // Game routes
 Route::get('game', [GameController::class, 'viewGame'])->name('game');
 Route::post('game/join', [GameController::class, 'joinGame'])->name('join');
-
-// Broadcasting routes
-Route::post('/broadcasting/auth', [RoomController::class, 'authChannel'])->withoutMiddleware(['csrf']);
-

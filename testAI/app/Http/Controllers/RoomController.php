@@ -55,7 +55,6 @@ class RoomController extends Controller
         $roomExists = in_array($roomCode, $activeRooms);
 
         \Log::info("Room code exists: " . $roomExists);
-
         return $roomExists;
     }
 
@@ -78,7 +77,6 @@ class RoomController extends Controller
         $playerName = $request->input('playerName');
         \Log::info("Player {$playerName} is attempting to join room {$roomCode}");
         if ($this->isValidRoomCode($roomCode)) {
-
             $uuid = $this->associatePlayerWithRoom($roomCode);
 
             return view('create', [
@@ -115,21 +113,6 @@ class RoomController extends Controller
         return $uuid;
     }
 
-    // public function viewLobby($uuid)
-    // {
-    //     // Retrieve the playerName and roomCode from Redis using the UUID.
-    //     $playerData = Redis::hgetall("player:{$uuid}");
-    //     $playerName = $playerData['playerName'] ?? null;
-    //     $roomCode = $playerData['roomCode'] ?? null;
-
-    //     if($playerName && $roomCode) {
-    //         event(new PlayerJoinedLobby($playerName, $roomCode));
-    //         return view('lobby');
-    //     } else {
-    //         // Handle error. Maybe redirect back with an error message.
-    //         return redirect()->back()->with('error', 'Failed to load lobby. Please try again.');
-    //     }
-    // }
     public function updatePlayer(Request $request)
     {
         $uuid = $request->input('uuid');
@@ -150,7 +133,6 @@ class RoomController extends Controller
     {
         // Get the UUID from Laravel's session
         $uuid = session('uuid');
-        
         // If, for some reason, uuid isn't in the session, redirect back with an error
         if (!$uuid) {
             return redirect()->back()->with('error', 'Session expired or invalid UUID.');
@@ -159,6 +141,7 @@ class RoomController extends Controller
         $playerData = Redis::hgetall("player:{$uuid}");
         $playerName = $playerData['playerName'] ?? null;
         $roomCode = $playerData['roomCode'] ?? null;
+        \Log::info("Player {$playerName} joined room {$roomCode}");
 
         if ($playerName && $roomCode) {
             event(new PlayerJoinedLobby($playerName, $roomCode));
@@ -197,16 +180,5 @@ class RoomController extends Controller
             return response()->json(['error' => 'Failed to fire PlayerJoinedLobby event.'], 400);
         }
     }
-    // public function updatePlayer(Request $request)
-    // {
-    //     $uuid = $request->input('uuid');
-    //     $playerName = $request->input('playerName');
-
-    //     Redis::hmset("player:{$uuid}", [
-    //         'playerName' => $playerName,
-    //     ]);
-
-    //     return response()->json(['success' => true]);
-    // }
 
 }

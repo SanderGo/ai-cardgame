@@ -1,0 +1,75 @@
+Environment:
+Laravel Breeze/Blade combo running on WSL(Ubuntu) docker containers. Utilizing Echo and Pusher for events, Redis
+and SessionStorage for any storage/db use.
+
+TO DO:
+Fix multiplayer system 
+Fix room code input accepting any number of digits and remove paste ability
+
+/home
+
+    Functions:
+        Generate UUID for each user upon page load.
+        Provide options to either create or join a game room.
+
+    Details:
+        Branding and game introduction.
+        Two main buttons: "Create a Room" and "Join a Room".
+
+    Events/Interactions:
+        "Create a Room": Generates a unique room code and navigates to /settings for game configuration.
+        "Join a Room": Prompts for room code input, validates its existence and length, and then redirects to /nickname for nickname entry.
+
+/lobby
+
+    Functions:
+        Display the room code.
+        Input for the player's desired nickname.
+        Set the number of questions for the game.
+        Choose a theme pack for the questions.
+        Customize timer duration for each question.
+        On nickname submission, initiate joining of the PresenceChannel.
+
+    Details:
+        Room code showcased at the top.
+        Nickname input field.
+        Settings panel with dropdowns/sliders for game configurations.
+        List of available theme packs with brief descriptions.
+        Start game button (for the room creator).
+        A panel or indication that the game will start once the creator begins.
+
+    Events/Interactions:
+        Configuration changes: Updates the settings for the room.
+        Submitting a nickname: Triggers the PlayerJoinedLobby event and completes the joining of the PresenceChannel.
+        "Start Game" (available only to the room creator): Begins the game with the selected settings, directing players to /game.
+/game
+
+    Functions:
+        Show the question to all players.
+        Allow answer selection by players (excluding the judge).
+        Reveal all answers (both human and AI) for the judge's selection.
+        Update and showcase scores post-each round.
+
+    Details:
+        Central display of the current question.
+        Hidden then revealed list of answers.
+        Scoreboard reflecting the Humans vs. AI score and individual player scores.
+
+    Events/Interactions:
+        Answer submission: Within the determined timer duration.
+        Judging: The judge picks the best answer, and points are allocated accordingly.
+
+/endgame
+
+    Functions:
+        Exhibit the concluding score of Humans vs. AI.
+        Announce the top-scoring player(s).
+        Offer options for a rematch or returning to the homepage.
+
+    Details:
+        Conclusive score and player highlights.
+        Buttons for replaying or navigation.
+
+    Events/Interactions:
+        "Play Again": Initiates a new game session.
+        "Return Home": Leads back to /home.

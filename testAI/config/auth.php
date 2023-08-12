@@ -36,9 +36,9 @@ return [
     */
 
     'guards' => [
-        'guest' => [
+        'web' => [
             'driver' => 'session',
-            'provider' => 'guest_users',
+            'provider' => 'users',
         ],
     ],
 
@@ -60,10 +60,15 @@ return [
     */
 
     'providers' => [
-        'guest_users' => [
-            'driver' => 'custom',
-            'model' => App\Models\Guest::class,
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
         ],
+
+        // 'users' => [
+        //     'driver' => 'database',
+        //     'table' => 'users',
+        // ],
     ],
 
     /*
