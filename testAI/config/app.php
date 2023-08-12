@@ -156,8 +156,8 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                'scheme' => 'https',
-                'useTLS' => true,
+                'scheme' => 'http',
+                'useTLS' => false,
             ],
         ],
     ],

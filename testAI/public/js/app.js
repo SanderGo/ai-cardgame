@@ -28,7 +28,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_2__);
 
 window.axios = axios__WEBPACK_IMPORTED_MODULE_0__["default"];
+
+// Set the X-Requested-With header
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// Add the CSRF token to axios defaults
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 
 window.Pusher = (pusher_js__WEBPACK_IMPORTED_MODULE_2___default());
@@ -36,13 +41,17 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   broadcaster: 'pusher',
   key: "4c231fdc01a893cb3773",
   cluster: "us2",
-  useTLS: true,
-  scheme: 'https',
-  authEndpoint: '/broadcasting/auth'
+  useTLS: false,
+  scheme: 'http',
+  authEndpoint: '/broadcasting/auth',
+  auth: {
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  }
 });
 window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(function (users) {
-  isConnected = true; // Set the flag to true when connected
-
+  isConnected = true;
   console.log('Users here:', users);
   users.forEach(function (user) {
     addPlayerToList(user.name);
@@ -58,14 +67,9 @@ window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(functi
     return;
   }
   console.log('Player joined lobby:', e.playerName);
-
-  // Get the updated player list from the event data
   var playerList = e.playerList;
-  // Clear the current player list in the HTML
   var playerListElement = document.getElementById('player-list');
   playerListElement.innerHTML = '';
-
-  // Loop through the player list and add players to the HTML
   playerList.forEach(function (player) {
     addPlayerToList(player);
   });

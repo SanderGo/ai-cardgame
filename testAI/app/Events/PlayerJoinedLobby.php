@@ -9,6 +9,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Log;
 
 class PlayerJoinedLobby implements ShouldBroadcastNow
 {
@@ -19,7 +20,7 @@ class PlayerJoinedLobby implements ShouldBroadcastNow
 
     public function __construct($playerName, $roomCode)
     {
-        \Log::info("PlayerJoinedLobby Event Fired for playerName: $playerName and roomCode: $roomCode");
+        Log::info("PlayerJoinedLobby Event Fired for playerName: $playerName and roomCode: $roomCode");
 
         $this->playerName = $playerName;
         $this->roomCode = $roomCode;
@@ -27,7 +28,9 @@ class PlayerJoinedLobby implements ShouldBroadcastNow
 
     public function broadcastOn()
     {
-        return new PresenceChannel('room.' . $this->roomCode);
+        $pres = new PresenceChannel('room.' . $this->roomCode);
+        Log::info("New PresenceChannel $pres");
+        return $pres;
     }
 
     public function broadcastAs()

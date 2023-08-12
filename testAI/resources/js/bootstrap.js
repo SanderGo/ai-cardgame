@@ -1,7 +1,11 @@
 import axios from 'axios';
 window.axios = axios;
 
+// Set the X-Requested-With header
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+// Add the CSRF token to axios defaults
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
@@ -12,14 +16,19 @@ window.Echo = new Echo({
     broadcaster: 'pusher',
     key: process.env.MIX_PUSHER_APP_KEY,
     cluster: process.env.MIX_PUSHER_APP_CLUSTER,
-    useTLS: true,
-    scheme: 'https',
+    useTLS: false,
+    scheme: 'http',
     authEndpoint: '/broadcasting/auth',
+    auth: {
+       headers: {
+           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+       }
+    }
 });
 
 window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
     .here((users) => {
-        isConnected = true; // Set the flag to true when connected
+        isConnected = true;
 
         console.log('Users here:', users);
         users.forEach(user => {
@@ -38,16 +47,14 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
             console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
             return;
         }
-
         console.log('Player joined lobby:', e.playerName);
         
-        // Get the updated player list from the event data
+
         let playerList = e.playerList;
-        // Clear the current player list in the HTML
+
         let playerListElement = document.getElementById('player-list');
         playerListElement.innerHTML = '';
 
-        // Loop through the player list and add players to the HTML
         playerList.forEach(player => {
             addPlayerToList(player);
         });

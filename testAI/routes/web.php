@@ -20,7 +20,6 @@ Route::get('/', fn() => view('home'))->name('home');
 
 // Room routes
 Route::get('create', [RoomController::class, 'createRoom'])->name('create');
-Route::post('set-code', [RoomController::class, 'setRoomCode'])->name('set-room-code');
 Route::get('code', [RoomController::class, 'getRoomCode'])->name('get-room-code');
 Route::get('lobby', [RoomController::class, 'viewLobby'])->name('lobby');
 Route::post('join', [RoomController::class, 'joinRoom'])->name('joinRoom');
