@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use App\Events\PlayerJoinedLobby;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class Controller extends BaseController
 {
@@ -78,7 +78,7 @@ class RoomController extends Controller
         $playerName = $request->input('playerName');
         \Log::info("Player {$playerName} is attempting to join room {$roomCode}");
         if ($this->isValidRoomCode($roomCode)) {
-            $uuid = $this->associatePlayerWithRoom($roomCode);
+            $uuid = $this->associatePlayerWithRoom($roomCode, $playerName);
 
             return view('create', [
                 'roomCode' => $roomCode,
@@ -101,9 +101,13 @@ class RoomController extends Controller
         return redirect()->route('lobby', $uuid);
     }
     
-    private function associatePlayerWithRoom($roomCode)
+    private function associatePlayerWithRoom($roomCode, $playerName = 'Player')
     {
-        $uuid = Uuid::uuid4()->toString();
+        // Create and login new User
+        $user = User::create(['name' => $playerName]);
+        auth()->login($user, true);
+
+        $uuid = $user->id;
 
         // Add the player's UUID to the room's set of players
         Redis::sadd("room:{$roomCode}:players", $uuid);
@@ -116,14 +120,19 @@ class RoomController extends Controller
 
     public function updatePlayer(Request $request)
     {
-        $uuid = $request->input('uuid');
+        // $uuid = $request->input('uuid');
         $playerName = $request->input('playerName');
 
-        // Store the UUID in Laravel's session
-        session(['uuid' => $uuid]);
+        // No need to store it again
+        // session(['uuid' => $uuid]);
+
+        // Update player's name
+        $user = User::find(auth()->id());
+        $user->update(['name' => $playerName]);
+
 
         // Save the playerName in Redis
-        Redis::hmset("player:{$uuid}", [
+        Redis::hmset("player:{$user->id}", [
             'playerName' => $playerName,
         ]);
 
