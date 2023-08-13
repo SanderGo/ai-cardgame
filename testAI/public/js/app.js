@@ -37,6 +37,7 @@ window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('m
 
 
 window.Pusher = (pusher_js__WEBPACK_IMPORTED_MODULE_2___default());
+window.Pusher.logToConsole = true;
 window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
   broadcaster: 'pusher',
   key: "4c231fdc01a893cb3773",

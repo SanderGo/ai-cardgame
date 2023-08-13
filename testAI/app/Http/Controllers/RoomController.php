@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use App\Events\PlayerJoinedLobby;
+use Illuminate\Support\Facades\Auth;
 
 class Controller extends BaseController
 {
@@ -133,6 +134,7 @@ class RoomController extends Controller
     {
         // Get the UUID from Laravel's session
         $uuid = session('uuid');
+        // Auth::loginUsingId(1);
         // If, for some reason, uuid isn't in the session, redirect back with an error
         if (!$uuid) {
             return redirect()->back()->with('error', 'Session expired or invalid UUID.');

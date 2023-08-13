@@ -42,4 +42,12 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    protected $attributes = [
+        'id' => 1,
+        'name' => 'Default',
+        'email' => 'default@yourwebsite.com',
+        'password' => '',
+    ];
+
 }
