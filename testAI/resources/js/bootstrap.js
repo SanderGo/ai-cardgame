@@ -31,12 +31,13 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
     .here((users) => {
         isConnected = true;
 
-        console.log('Users here:', users);
         users.forEach(user => {
             addPlayerToList(user.name);
         });
+        console.log('Users here:', users);
     })
     .joining((user) => {
+        addPlayerToList(user.name);
         console.log('A new user joined:', user.name);
     })
     .leaving((user) => {
@@ -60,3 +61,17 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
             addPlayerToList(player);
         });
     });
+
+function addPlayerToList(playerName) {
+    let playerListElement = document.getElementById('player-list');
+    let playerElement = document.createElement('li');
+    playerElement.innerText = playerName;
+    playerListElement.appendChild(playerElement);
+}
+
+function removePlayerFromList(playerName) {
+    let playerListElement = document.getElementById('player-list');
+    let playerElement = playerListElement.querySelector(`li:contains(${playerName})`);
+    playerListElement.removeChild(playerElement);
+}
+

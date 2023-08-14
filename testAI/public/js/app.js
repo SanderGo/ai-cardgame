@@ -59,6 +59,7 @@ window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(functi
   });
 }).joining(function (user) {
   console.log('A new user joined:', user.name);
+  addPlayerToList(user.name);
 }).leaving(function (user) {
   removePlayerFromList(user.name);
   console.log('A user left:', user.name);
@@ -75,6 +76,17 @@ window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(functi
     addPlayerToList(player);
   });
 });
+function addPlayerToList(playerName) {
+  var playerListElement = document.getElementById('player-list');
+  var playerElement = document.createElement('li');
+  playerElement.innerText = playerName;
+  playerListElement.appendChild(playerElement);
+}
+function removePlayerFromList(playerName) {
+  var playerListElement = document.getElementById('player-list');
+  var playerElement = playerListElement.querySelector("li:contains(".concat(playerName, ")"));
+  playerListElement.removeChild(playerElement);
+}
 
 /***/ }),
 

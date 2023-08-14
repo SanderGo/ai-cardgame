@@ -50,65 +50,6 @@
 
         document.getElementById('room-code').textContent = roomCode;
 
-        // Display the current player's name
-        addPlayerToList(playerName);
-
-        console.log(sessionStorage.getItem('roomCode'));
-        
-        // Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
-        //     .here((users) => {
-        //         isConnected = true; // Set the flag to true when connected
-
-        //         console.log('Users here:', users);
-        //         users.forEach(user => {
-        //             addPlayerToList(user.name);
-        //         });
-        //     })
-        //     .joining((user) => {
-        //         console.log('A new user joined:', user.name);
-        //     })
-        //     .leaving((user) => {
-        //         removePlayerFromList(user.name);
-        //         console.log('A user left:', user.name);
-        //     })
-        //     .listen('PlayerJoinedLobby', (e) => {
-        //         if (!isConnected) {
-        //             console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
-        //             return;
-        //         }
-
-        //         console.log('Player joined lobby:', e.playerName);
-                
-        //         // Get the updated player list from the event data
-        //         let playerList = e.playerList;
-        //         // Clear the current player list in the HTML
-        //         let playerListElement = document.getElementById('player-list');
-        //         playerListElement.innerHTML = '';
-
-        //         // Loop through the player list and add players to the HTML
-        //         playerList.forEach(player => {
-        //             addPlayerToList(player);
-        //         });
-        //     });
-
-        function addPlayerToList(newPlayerName) {
-            let playerListElement = document.getElementById('player-list');
-            let listItem = document.createElement('li');
-            listItem.textContent = newPlayerName;
-            playerListElement.appendChild(listItem);
-        }
-
-        function removePlayerFromList(playerNameToRemove) {
-            let playerListElement = document.getElementById('player-list');
-            let listItems = playerListElement.getElementsByTagName('li');
-            for (let item of listItems) {
-                if (item.textContent === playerNameToRemove) {
-                    playerListElement.removeChild(item);
-                    break;
-                }
-            } 
-        }
-
     </script>
     <script src="{{ asset('/js/app.js') }}"></script>
 </body>
