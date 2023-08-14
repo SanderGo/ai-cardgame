@@ -1,14 +1,10 @@
 import axios from 'axios';
-window.axios = axios;
-
-// Set the X-Requested-With header
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-// Add the CSRF token to axios defaults
-window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
+
+window.axios = axios;
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 window.Pusher = Pusher;
 window.Pusher.logToConsole = true;
@@ -51,7 +47,6 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
         }
         console.log('Player joined lobby:', e.playerName);
         
-
         let playerList = e.playerList;
 
         let playerListElement = document.getElementById('player-list');
@@ -60,18 +55,21 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
         playerList.forEach(player => {
             addPlayerToList(player);
         });
+    })
+    .error((error) => {
+        console.error('Error:', error);
     });
 
-function addPlayerToList(playerName) {
-    let playerListElement = document.getElementById('player-list');
-    let playerElement = document.createElement('li');
-    playerElement.innerText = playerName;
-    playerListElement.appendChild(playerElement);
-}
+    function addPlayerToList(playerName) {
+        let playerListElement = document.getElementById('player-list');
+        let playerElement = document.createElement('li');
+        playerElement.innerText = playerName;
+        playerListElement.appendChild(playerElement);
+    }
 
-function removePlayerFromList(playerName) {
-    let playerListElement = document.getElementById('player-list');
-    let playerElement = playerListElement.querySelector(`li:contains(${playerName})`);
-    playerListElement.removeChild(playerElement);
-}
+    function removePlayerFromList(playerName) {
+        let playerListElement = document.getElementById('player-list');
+        let playerElement = playerListElement.querySelector(`li:contains(${playerName})`);
+        playerListElement.removeChild(playerElement);
+    }
 

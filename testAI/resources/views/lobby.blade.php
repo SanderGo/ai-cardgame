@@ -47,9 +47,7 @@
         let playerName = sessionStorage.getItem('playerName');
         let roomCode = sessionStorage.getItem('roomCode');
         let isConnected = false; // Flag to check if the client is connected
-
         document.getElementById('room-code').textContent = roomCode;
-
     </script>
     <script src="{{ asset('/js/app.js') }}"></script>
 </body>

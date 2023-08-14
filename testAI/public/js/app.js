@@ -22,23 +22,19 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
-/* harmony import */ var laravel_echo__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! laravel-echo */ "./node_modules/laravel-echo/dist/echo.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
-/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! axios */ "./node_modules/axios/lib/axios.js");
+/* harmony import */ var laravel_echo__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! laravel-echo */ "./node_modules/laravel-echo/dist/echo.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! pusher-js */ "./node_modules/pusher-js/dist/web/pusher.js");
+/* harmony import */ var pusher_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(pusher_js__WEBPACK_IMPORTED_MODULE_1__);
 
-window.axios = axios__WEBPACK_IMPORTED_MODULE_0__["default"];
 
-// Set the X-Requested-With header
+
+window.axios = axios__WEBPACK_IMPORTED_MODULE_2__["default"];
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-// Add the CSRF token to axios defaults
 window.axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-
-window.Pusher = (pusher_js__WEBPACK_IMPORTED_MODULE_2___default());
+window.Pusher = (pusher_js__WEBPACK_IMPORTED_MODULE_1___default());
 window.Pusher.logToConsole = true;
-window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
+window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   broadcaster: 'pusher',
   key: "4c231fdc01a893cb3773",
   cluster: "us2",
@@ -53,13 +49,13 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_1__["default"]({
 });
 window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(function (users) {
   isConnected = true;
-  console.log('Users here:', users);
   users.forEach(function (user) {
     addPlayerToList(user.name);
   });
+  console.log('Users here:', users);
 }).joining(function (user) {
-  console.log('A new user joined:', user.name);
   addPlayerToList(user.name);
+  console.log('A new user joined:', user.name);
 }).leaving(function (user) {
   removePlayerFromList(user.name);
   console.log('A user left:', user.name);
@@ -75,6 +71,8 @@ window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(functi
   playerList.forEach(function (player) {
     addPlayerToList(player);
   });
+}).error(function (error) {
+  console.error('Error:', error);
 });
 function addPlayerToList(playerName) {
   var playerListElement = document.getElementById('player-list');

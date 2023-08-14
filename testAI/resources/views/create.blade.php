@@ -23,7 +23,6 @@
 
             // Using the embedded playerData
             sessionStorage.setItem('playerName', playerNameInput);
-
             sessionStorage.setItem('uuid', playerData.uuid);
 
             // Make an async request to Laravel to save player name and UUID in Redis
@@ -53,8 +52,6 @@
                 alert('Error: ' + error);
             }
         }
-
-
     </script>
     <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>

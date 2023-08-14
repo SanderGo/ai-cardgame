@@ -18,7 +18,6 @@
         var nextUrl = '@yield('nextUrl')';
     </script>
     <script src="{{ asset('js/timer.js') }}"></script>
-
 </head>
 <body>
     <div id="app">

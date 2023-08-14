@@ -33,8 +33,7 @@ class RoomController extends Controller
         do {
             $roomCode = Str::upper(Str::random(5));
         } while (Redis::sismember('active_rooms', $roomCode));
-        
-        // Add the generated room code to the set of active rooms
+
         Redis::sadd('active_rooms', $roomCode);
 
         return $roomCode;
@@ -47,15 +46,13 @@ class RoomController extends Controller
         $playerName = $playerData['playerName'] ?? null;
         $roomCode = $playerData['roomCode'] ?? null;
 
-
-        \Log::info("Checking if room code {$roomCode} is valid");
+        \Log::info("isValidRoomCode: Checking if room code {$roomCode} is valid");
 
         $activeRooms = Redis::smembers('active_rooms');
-
-        // Check if the roomCode is in the activeRooms array
         $roomExists = in_array($roomCode, $activeRooms);
 
-        \Log::info("Room code exists: " . $roomExists);
+        \Log::info("isValidRoomCode: Room code exists: " . $roomExists);
+
         return $roomExists;
     }
 
@@ -75,12 +72,14 @@ class RoomController extends Controller
     public function joinRoom(Request $request)
     {
         $roomCode = $request->input('roomCode');
+
         if ($this -> isValidRoomCode($roomCode)) {
             $uuid = $this->associatePlayerWithRoom($roomCode);
             return view('create', [
                 'roomCode' => $roomCode,
                 'uuid' => $uuid,
             ]);
+            
         } else {
             return redirect()->back()->with('error', 'Room not found');
         }
@@ -93,8 +92,7 @@ class RoomController extends Controller
         $playerName = $request->input('player_name');
         
         Redis::hmset("player:{$uuid}", ['playerName' => $playerName]);
-        \Log::info("Player {$playerName} joined room {$roomCode}");
-        
+        \Log::info("setPlayerName: Player {$playerName} joined room {$roomCode}");        
         return redirect()->route('lobby', $uuid);
     }
     
@@ -118,17 +116,23 @@ class RoomController extends Controller
 
     public function updatePlayer(Request $request)
     {
-        \Log::info("Inside updatePlayer method");
         $playerName = $request->input('playerName');
-        
+        \Log::info("updatePlayer: Updating Player Name");
+
         $user = User::find(auth()->id());
-        \Log::info("Found user: " . ($user ? $user->id : 'null'));
-    
+        if (!$user) {
+            \Log::error("updatePlayer: User not found");
+            return response()->json(['error' => 'User not found'], 404);
+        }        
+        else {
+            \Log::info("updatePlayer: Found user: " . ($user ? $user->id : 'null')); 
+        }
+        
         $user->update(['name' => $playerName]);
     
         Redis::hmset("player:{$user->id}", ['playerName' => $playerName]);
     
-        \Log::info("Updated Redis for player: " . $user->id);
+        \Log::info("updatePlayer: Updated Redis for player: " . $user->id);
         session(['uuid' => $user->id]);
 
         return response()->json(['success' => true]);
@@ -137,10 +141,10 @@ class RoomController extends Controller
     public function viewLobby() 
     {
         $uuid = session('uuid');
-        \Log::info("Inside viewLobby method with UUID: $uuid");
-    
+        \Log::info("viewLobby: Inside viewLobby method with UUID: $uuid");    
+
         if (!$uuid) {
-            \Log::error("UUID not found in session");
+            \Log::error("viewLobby: UUID not found in session");
             return redirect()->back()->with('error', 'Session expired or invalid UUID.');
         }
     
@@ -148,8 +152,8 @@ class RoomController extends Controller
         $playerName = $playerData['playerName'] ?? null;
         $roomCode = $playerData['roomCode'] ?? null;
     
-        \Log::info("Fetched playerName ($playerName) and roomCode ($roomCode) from Redis");
-    
+        \Log::info("viewLobby: Fetched playerName ($playerName) and roomCode ($roomCode) from Redis");
+
         if ($playerName && $roomCode) {
             event(new PlayerJoinedLobby($playerName, $roomCode));
             return view('lobby');
@@ -165,8 +169,8 @@ class RoomController extends Controller
         $channelName = $request->input('channel_name');
         $roomCode = $channelName;
         $isValidRoomCode = $this->isValidRoomCode($roomCode);
-        \Log::info("Authenticating channel {$channelName} for room {$roomCode}. Valid room code: {$isValidRoomCode}");
 
+        \Log::info("authChannel: Authenticating channel {$channelName} for room {$roomCode}. Valid room code: {$isValidRoomCode}");
         return response()->json(['isValidRoomCode' => $isValidRoomCode]);
     }
 
