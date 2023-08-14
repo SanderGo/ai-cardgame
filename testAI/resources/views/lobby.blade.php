@@ -9,6 +9,7 @@
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
           crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <script src="{{ asset('js/bgMove.js') }}"></script>
     <title>Lobby</title>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
     

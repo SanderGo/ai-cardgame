@@ -7,18 +7,7 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AI:OH</title>
-    <script>
-        let y = 0;
-        const interval = setInterval(function(){
-            y += 1;
-            document.body.style.backgroundPosition = '0 ' + y + 'px';
-        }, 10);
-
-        window.onunload = function() {
-            clearInterval(interval);
-        };
-    </script>
-    <script src="{{ asset('js/stringInput.js') }}"></script>
+    <script src="{{ asset('js/bgMove.js') }}"></script>
 </head>
 <body>
     <div id="titleContainer">
@@ -42,8 +31,9 @@
         <form action="/join" method="post">
             @csrf
             <button type="submit" class="btn btn-light custom-button1">JOIN A ROOM</button>
-            <input class="form-control input1" type="text" id="roomCodeInput" name="roomCode" placeholder="Enter Room Code Here!" onfocus="this.value=''" onkeypress="return isAlphanumeric(event)">
+            <input class="form-control input1" type="text" id="roomCodeInput" name="roomCode" placeholder="Enter Room Code Here!" data-maxlength="5">
         </form>
     </div>
+    <script src="{{ asset('js/handleInput.js') }}"></script>
 </body>
 </html>
