@@ -59,6 +59,13 @@ window.Echo.join("room.".concat(sessionStorage.getItem("roomCode"))).here(functi
 }).leaving(function (user) {
   removePlayerFromList(user.name);
   console.log('A user left:', user.name);
+
+  // Send an AJAX request to handle individual player cleanups.
+  axios__WEBPACK_IMPORTED_MODULE_2__["default"].post('/cleanup-player', {
+    uuid: user.id,
+    // Assuming user ID is the UUID.
+    roomCode: sessionStorage.getItem("roomCode")
+  });
 }).listen('PlayerJoinedLobby', function (e) {
   if (!isConnected) {
     console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
@@ -82,8 +89,13 @@ function addPlayerToList(playerName) {
 }
 function removePlayerFromList(playerName) {
   var playerListElement = document.getElementById('player-list');
-  var playerElement = playerListElement.querySelector("li:contains(".concat(playerName, ")"));
-  playerListElement.removeChild(playerElement);
+  var playerElements = Array.from(playerListElement.children); // Convert HTMLCollection to array
+
+  playerElements.forEach(function (element) {
+    if (element.textContent === playerName) {
+      playerListElement.removeChild(element);
+    }
+  });
 }
 
 /***/ }),

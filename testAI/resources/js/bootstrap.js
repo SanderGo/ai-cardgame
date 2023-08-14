@@ -39,7 +39,13 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
     .leaving((user) => {
         removePlayerFromList(user.name);
         console.log('A user left:', user.name);
-    })
+    
+        // Send an AJAX request to handle individual player cleanups.
+        axios.post('/cleanup-player', {
+            uuid: user.id,  // Assuming user ID is the UUID.
+            roomCode: sessionStorage.getItem("roomCode")
+        });
+    })    
     .listen('PlayerJoinedLobby', (e) => {
         if (!isConnected) {
             console.log('Not connected yet. Ignoring PlayerJoinedLobby event.');
@@ -60,6 +66,9 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
         console.error('Error:', error);
     });
 
+
+
+    
     function addPlayerToList(playerName) {
         let playerListElement = document.getElementById('player-list');
         let playerElement = document.createElement('li');
@@ -69,7 +78,13 @@ window.Echo.join(`room.${sessionStorage.getItem("roomCode")}`)
 
     function removePlayerFromList(playerName) {
         let playerListElement = document.getElementById('player-list');
-        let playerElement = playerListElement.querySelector(`li:contains(${playerName})`);
-        playerListElement.removeChild(playerElement);
+        let playerElements = Array.from(playerListElement.children);  // Convert HTMLCollection to array
+    
+        playerElements.forEach(function(element) {
+            if (element.textContent === playerName) {
+                playerListElement.removeChild(element);
+            }
+        });
     }
+    
 

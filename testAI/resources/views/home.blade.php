@@ -8,6 +8,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AI:OH</title>
     <script src="{{ asset('js/bgMove.js') }}"></script>
+    <script>
+    // Get uuid from sessionStorage if exists, then set it to var and clear sessionStorage.
+    var uuid = sessionStorage.getItem('uuid');
+    sessionStorage.clear();
+    </script>
 </head>
 <body>
     <div id="titleContainer">

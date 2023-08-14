@@ -19,6 +19,7 @@ Route::middleware('auth:web')->group(function () {
   Route::post('update-player', [RoomController::class, 'updatePlayer'])->name('update-player');
   Route::post('set-player-name', [RoomController::class, 'setPlayerName']);
   Route::post('/client-joined-channel', [RoomController::class, 'clientJoinedChannel']);
+  Route::post('/cleanup-player', [RoomController::class, 'cleanupPlayer']);
 });
 
 // Game routes

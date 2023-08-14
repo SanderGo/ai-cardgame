@@ -190,4 +190,29 @@ class RoomController extends Controller
         }
     }
 
+    public function cleanupPlayer(Request $request) {
+        $uuid = $request->input('uuid');
+        $roomCode = $request->input('roomCode');
+    
+        // 1. Remove the player from Redis.
+        Redis::del("player:{$uuid}");
+    
+        // 2. Remove the player from the room's set of players.
+        Redis::srem("room:{$roomCode}:players", $uuid);
+    
+        // 3. Remove the player from SQL.
+        User::find($uuid)->delete();
+    
+        // 4. Check if the room is now empty.
+        if (!Redis::scard("room:{$roomCode}:players")) {
+            // Remove the room's set of players.
+            Redis::del("room:{$roomCode}:players");
+    
+            // Remove the room from the set of active rooms.
+            Redis::srem('active_rooms', $roomCode);
+        }
+    
+        return response()->json(['message' => 'Player and potentially room cleaned up']);
+    }
+    
 }
