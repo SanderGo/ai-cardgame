@@ -29,7 +29,7 @@ class PlayerJoinedLobby implements ShouldBroadcastNow
     public function broadcastOn()
     {
         $pres = new PresenceChannel('room.' . $this->roomCode);
-        Log::info("New PresenceChannel $pres");
+        Log::info("New PresenceChannel $pres\n");
         return $pres;
     }
 
@@ -37,12 +37,5 @@ class PlayerJoinedLobby implements ShouldBroadcastNow
     {
         return 'PlayerJoinedLobby';
     }
-
-    // public function broadcastWith()
-    // {
-    //     $playerList = Redis::smembers("room:{$this->roomCode}:players");
-    //     \Log::info("PlayerJoinedLobby Event broadcastWith: " . json_encode($playerList));
-    //     return ['playerName' => $this->playerName, 'playerList' => $playerList];
-    // }
 }
 

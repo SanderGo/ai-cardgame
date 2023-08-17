@@ -28,8 +28,10 @@
         @endif
 
         <div> 
-            <button onclick="location.href='{{ route('create') }}'" class="btn btn-light custom-button1">CREATE A ROOM</button>
-        </div>
+                    <button onclick="location.href='{{ route('create') }}'" class="btn btn-light custom-button1">CREATE A ROOM</button>
+                </div>
+            </body>
+            </html>
         <br>
         
         <!-- Form for joining a room -->
