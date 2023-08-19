@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <script src="{{ asset('js/bgMove.js') }}"></script>
     <title>AI:OH</title>
     <script>
         var playerData = {
@@ -14,7 +15,7 @@
         }
         sessionStorage.setItem('roomCode', playerData.roomCode);
         async function joinLobby() {
-            var playerNameInput = document.getElementById("player_name").value.trim();
+            var playerNameInput = document.getElementById("playerNameInput").value.trim();
 
             if (playerNameInput === '') {
                 alert('Please enter a nickname.');
@@ -23,7 +24,6 @@
 
             // Using the embedded playerData
             sessionStorage.setItem('playerName', playerNameInput);
-
             sessionStorage.setItem('uuid', playerData.uuid);
 
             // Make an async request to Laravel to save player name and UUID in Redis
@@ -53,10 +53,7 @@
                 alert('Error: ' + error);
             }
         }
-
-
     </script>
-    <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>
 
 <body>
@@ -69,7 +66,8 @@
         <div id="join-button">
             <button onclick="joinLobby()" class="btn btn-light custom-button1">Create a room!</button>
         </div>
-        <input class="form-control input1" type="text" id="player_name" name="player_name" placeholder="Enter Nickname Here" onkeypress="return isAlphanumeric(event)">
+        <input class="form-control input1" type="text" id="playerNameInput" name="player_name" placeholder="Enter Nickname Here" data-maxlength="20">
     </div>
+    <script src="{{ asset('js/handleInput.js') }}"></script>
 </body>
 </html>

@@ -1,10 +1,6 @@
 Environment:
-Laravel Breeze/Blade combo running on WSL(Ubuntu) docker containers. Utilizing Echo and Pusher for events, Redis
+Laravel Blade running on WSL(Ubuntu) docker containers. Utilizing Echo and Pusher for events, Redis
 and SessionStorage for any storage/db use.
-
-TO DO:
-Fix multiplayer system 
-Fix room code input accepting any number of digits and remove paste ability
 
 /home
 

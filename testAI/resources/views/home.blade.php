@@ -7,18 +7,12 @@
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>AI:OH</title>
+    <script src="{{ asset('js/bgMove.js') }}"></script>
     <script>
-        let y = 0;
-        const interval = setInterval(function(){
-            y += 1;
-            document.body.style.backgroundPosition = '0 ' + y + 'px';
-        }, 10);
-
-        window.onunload = function() {
-            clearInterval(interval);
-        };
+    // Get uuid from sessionStorage if exists, then set it to var and clear sessionStorage.
+    var uuid = sessionStorage.getItem('uuid');
+    sessionStorage.clear();
     </script>
-    <script src="{{ asset('js/stringInput.js') }}"></script>
 </head>
 <body>
     <div id="titleContainer">
@@ -34,16 +28,19 @@
         @endif
 
         <div> 
-            <button onclick="location.href='{{ route('create') }}'" class="btn btn-light custom-button1">CREATE A ROOM</button>
-        </div>
+                    <button onclick="location.href='{{ route('create') }}'" class="btn btn-light custom-button1">CREATE A ROOM</button>
+                </div>
+            </body>
+            </html>
         <br>
         
         <!-- Form for joining a room -->
         <form action="/join" method="post">
             @csrf
             <button type="submit" class="btn btn-light custom-button1">JOIN A ROOM</button>
-            <input class="form-control input1" type="text" id="roomCodeInput" name="roomCode" placeholder="Enter Room Code Here!" onfocus="this.value=''" onkeypress="return isAlphanumeric(event)">
+            <input class="form-control input1" type="text" id="roomCodeInput" name="roomCode" placeholder="Enter Room Code Here!" data-maxlength="5">
         </form>
     </div>
+    <script src="{{ asset('js/handleInput.js') }}"></script>
 </body>
 </html>
